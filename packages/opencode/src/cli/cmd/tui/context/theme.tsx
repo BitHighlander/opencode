@@ -312,7 +312,7 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
           )
         })
         .catch(() => {
-          setStore("active", "opencode")
+          setStore("active", "matrix")
         })
         .finally(() => {
           if (store.active !== "system") {
@@ -333,7 +333,7 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
             if (store.active === "system") {
               setStore(
                 produce((draft) => {
-                  draft.active = "opencode"
+                  draft.active = "matrix"
                   draft.ready = true
                 }),
               )
