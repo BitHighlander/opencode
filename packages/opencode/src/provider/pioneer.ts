@@ -38,6 +38,6 @@ export function createPioneer(options: Record<string, any> = {}) {
     name: options.name || "pioneer",
     baseURL,
     apiKey,
-    fetch: pioneerFetch,
+    fetch: pioneerFetch as typeof globalThis.fetch,
   })
 }
