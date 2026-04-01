@@ -83,31 +83,6 @@ const cli = yargs(hideBin(process.argv))
       args: process.argv.slice(2),
     })
 
-    // Auto-create pioneer provider config if no config exists anywhere
-    const globalConfig = path.join(Global.Path.config, "opencode.json")
-    const localConfigs = ["opencode.jsonc", "opencode.json", ".opencode/opencode.jsonc", ".opencode/opencode.json"]
-    const hasLocal = localConfigs.some((f) => {
-      try { return require("fs").existsSync(path.resolve(process.cwd(), f)) } catch { return false }
-    })
-    const hasGlobal = require("fs").existsSync(globalConfig)
-    if (!hasLocal && !hasGlobal) {
-      const dir = path.dirname(globalConfig)
-      require("fs").mkdirSync(dir, { recursive: true })
-      require("fs").writeFileSync(globalConfig, JSON.stringify({
-        "$schema": "https://opencode.ai/config.json",
-        provider: {
-          pioneer: {
-            name: "Pioneer",
-            npm: "pioneer",
-            models: { auto: { name: "Auto", tool_call: true, limit: { context: 262144, output: 16384 } } },
-            options: { baseURL: "https://alpha.pioneers.dev/api/v1", apiKey: "not-needed", timeout: false },
-          },
-        },
-        model: "pioneer/auto",
-      }, null, 2))
-      process.stderr.write("Created default Pioneer config at " + globalConfig + EOL)
-    }
-
     const marker = path.join(Global.Path.data, "opencode.db")
     if (!(await Filesystem.exists(marker))) {
       const tty = process.stderr.isTTY
