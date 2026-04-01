@@ -1,7 +1,7 @@
 import z from "zod"
 import { EOL } from "os"
 import { NamedError } from "@opencode-ai/util/error"
-import { logo as glyphs } from "./logo"
+import { logo as glyphs, art, tagline } from "./logo"
 
 export namespace UI {
   export const CancelledError = NamedError.create("UICancelledError", z.void())
@@ -41,50 +41,34 @@ export namespace UI {
   }
 
   export function logo(pad?: string) {
-    const result: string[] = []
     const reset = "\x1b[0m"
-    const left = {
-      fg: "\x1b[90m",
-      shadow: "\x1b[38;5;235m",
-      bg: "\x1b[48;5;235m",
-    }
-    const right = {
-      fg: reset,
-      shadow: "\x1b[38;5;238m",
-      bg: "\x1b[48;5;238m",
-    }
-    const gap = " "
-    const draw = (line: string, fg: string, shadow: string, bg: string) => {
-      const parts: string[] = []
-      for (const char of line) {
-        if (char === "_") {
-          parts.push(bg, " ", reset)
-          continue
-        }
-        if (char === "^") {
-          parts.push(fg, bg, "▀", reset)
-          continue
-        }
-        if (char === "~") {
-          parts.push(shadow, "▀", reset)
-          continue
-        }
-        if (char === " ") {
-          parts.push(" ")
-          continue
-        }
-        parts.push(fg, char, reset)
-      }
-      return parts.join("")
-    }
-    glyphs.left.forEach((row, index) => {
+    const green = "\x1b[32m"
+    const gold = "\x1b[38;5;220m"
+    const blue = "\x1b[38;5;39m"
+    const dim = "\x1b[90m"
+    const bold = "\x1b[1m"
+
+    const result: string[] = []
+    // Mountain art with colored ₿ (gold) and water ~ (blue)
+    for (const line of art) {
       if (pad) result.push(pad)
-      result.push(draw(row, left.fg, left.shadow, left.bg))
-      result.push(gap)
-      const other = glyphs.right[index] ?? ""
-      result.push(draw(other, right.fg, right.shadow, right.bg))
+      const colored = line
+        .replace(/₿/g, `${gold}${bold}₿${reset}${green}`)
+        .replace(/~([^~])/g, `${blue}~${reset}${green}$1`)
+        .replace(/={2,}/g, (m) => `${blue}${m}${reset}${green}`)
+      result.push(green + colored + reset)
       result.push(EOL)
-    })
+    }
+    // Tagline
+    if (pad) result.push(pad)
+    result.push(EOL)
+    if (pad) result.push(pad)
+    result.push(dim + " " + tagline + reset)
+    result.push(EOL)
+    if (pad) result.push(pad)
+    result.push(dim + "                        ---Highlander" + reset)
+    result.push(EOL)
+
     return result.join("").trimEnd()
   }
 
