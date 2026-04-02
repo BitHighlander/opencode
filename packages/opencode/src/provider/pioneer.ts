@@ -1,8 +1,10 @@
 /**
  * Pioneer Provider — integration with Pioneer Server's unified inference API.
  *
- * Uses streaming (required by AI SDK) but with extended timeouts for reasoning models
- * that may take 30-60s before producing the first token.
+ * Auth: JWT from wallet challenge-response (passed as apiKey in config).
+ * The JWT is sent as Authorization: Bearer on every request.
+ *
+ * Extended timeouts for reasoning models that take 30-60s before first token.
  */
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 
@@ -10,8 +12,16 @@ export function createPioneer(options: Record<string, any> = {}) {
   const baseURL = options.baseURL || "https://alpha.pioneers.dev/api/v1"
   const apiKey = options.apiKey || "not-needed"
 
-  // Wrap fetch to remove any abort signals with short timeouts
-  // Reasoning models need 60-120s before first token
+  // Log auth status (once, on provider creation)
+  const isJWT = apiKey.startsWith("eyJ")
+  const isKey = apiKey.startsWith("sk-pioneer")
+  if (isJWT) {
+    console.error(`[pioneer-provider] Authenticated (JWT)`)
+  } else if (isKey) {
+    console.error(`[pioneer-provider] Authenticated (API key)`)
+  } else if (apiKey === "not-needed" || apiKey === "pioneer-relay" || apiKey === "dummy-dev") {
+    console.error(`[pioneer-provider] WARNING: No auth — requests will fail if server requires it`)
+  }
   const originalFetch = options.fetch ?? globalThis.fetch
 
   const pioneerFetch = async (input: any, init?: any) => {
